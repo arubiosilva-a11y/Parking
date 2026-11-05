@@ -19,7 +19,7 @@ public class Tarifa {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "tarifa")
-    private Short idTarifa;
+    private Long idTarifa;
 
     @Column(name = "precio_min")
     private Integer precioMin;

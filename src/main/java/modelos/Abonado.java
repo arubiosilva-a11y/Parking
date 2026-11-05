@@ -20,7 +20,7 @@ public class Abonado {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_abonado")
-    private Short idAbonado;
+    private Long idAbonado;
 
     @Column(name = "nombre")
     private String nombre;

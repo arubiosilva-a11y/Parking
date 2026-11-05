@@ -20,7 +20,10 @@ public class Ticket {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_ticket")
-    private Short idTicket;
+    private Long idTicket;
+
+    @Column(name = "matricula")
+    private String matricula;
 
     @Column(name = "hora_entrada")
     private LocalDateTime horaEntrada;

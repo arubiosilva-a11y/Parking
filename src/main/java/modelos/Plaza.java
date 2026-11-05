@@ -1,5 +1,6 @@
 package modelos;
 
+import es.safareyes.parking.enums.Estado;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -20,7 +21,7 @@ public class Plaza {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_plaza")
-    private Short idPlaza;
+    private Long idPlaza;
 
     @Column(name = "num")
     private Integer numero;
@@ -31,8 +32,9 @@ public class Plaza {
     @Column(name = "tipo")
     private String tipo;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "estado")
-    private String estado;
+    private Estado estado;
 
 
 
