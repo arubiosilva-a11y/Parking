@@ -3,6 +3,7 @@ package modelos;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
@@ -30,6 +31,6 @@ public class Promocion {
     private String tipo;
 
     @Column(name = "min_descuento")
-    private Integer minDescuento;
+    private BigDecimal minDescuento;
 
 }

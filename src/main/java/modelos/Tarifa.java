@@ -3,6 +3,7 @@ package modelos;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
@@ -22,7 +23,7 @@ public class Tarifa {
     private Long idTarifa;
 
     @Column(name = "precio_min")
-    private Integer precioMin;
+    private BigDecimal precioMin;
 
     @Column(name = "min_cortesía")
     private Integer minCortesia;

@@ -3,12 +3,13 @@ package modelos;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
 
 @Entity
-@Table(name="plaza")
+@Table(name="ticket")
 @Getter @Setter
 @EqualsAndHashCode
 @NoArgsConstructor
@@ -37,8 +38,11 @@ public class Ticket {
     @Column(name = "descuento")
     private Integer descuento;
 
+    @Column(name = "importe")
+    private BigDecimal importe;
+
     @Column(name = "importe_descuento")
-    private Integer importeDescuento;
+    private BigDecimal importeDescuento;
 
     @Column(name = "estado")
     private String estado;
