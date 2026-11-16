@@ -1,7 +1,6 @@
 package es.safareyes.parking.repository;
 
 import es.safareyes.parking.entity.*;
-import es.safareyes.parking.enums.Estado;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
@@ -47,7 +46,7 @@ class ParkingRepositoryTest {
     @Test
     void abonadoRepository_shouldFindByMatriculaAndActiveDateRange() {
         LocalDateTime now = LocalDateTime.of(2026, 11, 16, 12, 0);
-        Abonado abonado = new Abonado(null, "Ana", "ana@test.com", "1234ABC", now.plusDays(1), now.minusDays(1));
+        Abonado abonado = new Abonado(null, "Ale", "ale@test.com", "1234ABC", now.plusDays(1), now.minusDays(1));
 
         abonadoRepository.save(abonado);
 
@@ -56,7 +55,7 @@ class ParkingRepositoryTest {
         );
 
         assertThat(encontrado).isNotNull();
-        assertThat(encontrado.getEmail()).isEqualTo("ana@test.com");
+        assertThat(encontrado.getEmail()).isEqualTo("ale@test.com");
     }
 
     @Test
