@@ -5,6 +5,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.FieldError;
+import org.springframework.validation.method.ParameterErrors;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -13,6 +15,7 @@ import org.springframework.web.method.annotation.HandlerMethodValidationExceptio
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 import java.util.Objects;
+import java.util.stream.Stream;
 
 @RestControllerAdvice
 public class ManejadorExcepciones extends ResponseEntityExceptionHandler {
@@ -20,6 +23,11 @@ public class ManejadorExcepciones extends ResponseEntityExceptionHandler {
     @ExceptionHandler(RecursoNoEncontradoException.class)
     public ProblemDetail gestionarRecursoNoEncontrado(RecursoNoEncontradoException excepcion) {
         return ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, excepcion.getMessage());
+    }
+
+    @ExceptionHandler(ConflictoException.class)
+    public ProblemDetail gestionarConflicto(ConflictoException excepcion) {
+        return ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, excepcion.getMessage());
     }
 
     @ExceptionHandler(ReglaNegocioException.class)
@@ -47,7 +55,9 @@ public class ManejadorExcepciones extends ResponseEntityExceptionHandler {
     ) {
         ProblemDetail problema = excepcion.getBody();
         problema.setProperty("campos", excepcion.getParameterValidationResults().stream()
-                .map(resultado -> resultado.getMethodParameter().getParameterName())
+                .flatMap(resultado -> resultado instanceof ParameterErrors errores && errores.hasFieldErrors()
+                        ? errores.getFieldErrors().stream().map(FieldError::getField)
+                        : Stream.of(resultado.getMethodParameter().getParameterName()))
                 .filter(Objects::nonNull)
                 .distinct()
                 .toList());

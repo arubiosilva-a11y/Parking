@@ -1,6 +1,8 @@
 package es.safareyes.parking.repository;
 
 import es.safareyes.parking.dto.RecaudacionDiaDto;
+import jakarta.persistence.LockModeType;
+import org.springframework.data.jpa.repository.Lock;
 import es.safareyes.parking.entity.Ticket;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -11,12 +13,20 @@ import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface ITicketRepository extends JpaRepository<Ticket, Integer>,
         JpaSpecificationExecutor<Ticket> {
 
     Ticket findFirstByMatriculaAndEstadoIgnoreCase(String matricula, String estado);
+
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("select t from Ticket t where t.idTicket = :id")
+    Optional<Ticket> buscarPorIdParaActualizar(@Param("id") Integer id);
+
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    Optional<Ticket> findFirstByMatriculaAndEstadoIgnoreCaseOrderByIdTicketAsc(String matricula, String estado);
 
     @Query("select t from Ticket t where t.idTicket = :id")
     @EntityGraph(attributePaths = {"plaza", "abonado", "tarifa", "promocion"})
