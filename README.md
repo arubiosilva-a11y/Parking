@@ -1,19 +1,17 @@
 # ProyectoParking
 
-API REST de ParkControl. Requiere Java 25, Maven y PostgreSQL con las tablas del proyecto.
+API REST de ParkControl. Requiere Java 25, Maven y PostgreSQL.
 
 ## Arranque con seguridad
 
-1. Configura `DB_URL` (URL JDBC), `DB_USER`, `DB_PASSWORD` y `DB_SCHEMA` en tu entorno o en la configuración de ejecución de IntelliJ.
-2. Aplica una vez la migración de seguridad en el mismo esquema de las tablas de ParkControl. Por ejemplo, con una URL PostgreSQL sin el prefijo `jdbc:` y la contraseña gestionada por el cliente `psql`:
+1. Configura `DB_URL` (URL JDBC), `DB_USER`, `DB_PASSWORD` y `DB_SCHEMA=parking` en tu entorno o en la configuración de ejecución de IntelliJ.
+2. Para una instalación nueva, ejecuta una vez [sql/parking.sql](sql/parking.sql) en la base de datos de destino. Usa una URL PostgreSQL sin el prefijo `jdbc:` si ejecutas el archivo con `psql`:
 
    ```bash
-   PGOPTIONS="-c search_path=${DB_SCHEMA}" psql "$PARKING_PG_DSN" -v ON_ERROR_STOP=1 -f sql/migration/001_seguridad_parking.sql
+   psql "$PARKING_PG_DSN" -v ON_ERROR_STOP=1 -f sql/parking.sql
    ```
 
-   En IntelliJ o DataGrip, selecciona el esquema `parking` en la consola SQL de la base `postgres` y ejecuta el archivo completo. Si un intento anterior dejó la consola con el mensaje `transacción abortada`, ejecuta `ROLLBACK;` en esa consola antes de reintentar.
-
-   La migración convierte las cuentas existentes con rol `CLIENTE` y abonado asociado en cuentas `ABONADO`. Conserva su vínculo y su contraseña almacenada. Las cuentas de personal pueden quedar sin abono. Si hay correos o vínculos duplicados, datos obligatorios ausentes o roles incompatibles, PostgreSQL revierte la migración.
+   También puedes abrir el archivo en IntelliJ o DataGrip y ejecutarlo completo en la consola de la base de datos de destino. El script crea el esquema `parking` con las tablas vacías. Para registrar entradas, crea primero una tarifa vigente y plazas desde la API.
 3. Genera un secreto aleatorio para los JWT y arranca la aplicación:
 
    ```bash
@@ -31,11 +29,11 @@ Un responsable de la base de datos crea las cuentas de personal. Genera un hash 
 python3 -c 'import bcrypt, getpass; print(bcrypt.hashpw(getpass.getpass("Contraseña: ").encode(), bcrypt.gensalt(rounds=10)).decode())'
 ```
 
-En una sesión interactiva de `psql` con el esquema de ParkControl, introduce el hash y crea la cuenta. Para dar de alta un operador, elige el rol `OPERADOR`.
+En una sesión interactiva de `psql`, introduce el hash y crea la cuenta. Para dar de alta un operador, elige el rol `OPERADOR`.
 
 ```sql
 \prompt 'Hash BCrypt: ' hash_bcrypt
-INSERT INTO usuario (nombre, email, "contraseña", rol)
+INSERT INTO parking.usuario (nombre, email, "contraseña", rol)
 VALUES ('Administrador', 'admin@example.com', :'hash_bcrypt', 'ADMIN');
 \unset hash_bcrypt
 ```
