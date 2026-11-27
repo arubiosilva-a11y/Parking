@@ -6,6 +6,7 @@ import es.safareyes.parking.exception.RecursoNoEncontradoException;
 import es.safareyes.parking.service.TarifaService;
 import es.safareyes.parking.mapper.TarifaMapper;
 import es.safareyes.parking.entity.Tarifa;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import es.safareyes.parking.repository.ITarifaRepository;
@@ -35,6 +36,7 @@ public class TarifaServiceImpl implements TarifaService {
     }
 
     @Override
+    @PreAuthorize("hasRole('ADMIN')")
     @Transactional
     public TarifaResponse crear(TarifaRequest request) {
         return tarifaMapper.toResponse(tarifaRepository.save(tarifaMapper.toEntity(request)));

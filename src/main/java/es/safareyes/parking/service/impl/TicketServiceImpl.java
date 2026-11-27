@@ -9,6 +9,7 @@ import es.safareyes.parking.entity.Descuento;
 import es.safareyes.parking.entity.Promocion;
 import es.safareyes.parking.exception.ConflictoException;
 import es.safareyes.parking.enums.Estado;
+import es.safareyes.parking.enums.Rol;
 import es.safareyes.parking.exception.RecursoNoEncontradoException;
 import es.safareyes.parking.exception.ReglaNegocioException;
 import es.safareyes.parking.service.TicketService;
@@ -17,6 +18,10 @@ import es.safareyes.parking.entity.Abonado;
 import es.safareyes.parking.entity.Plaza;
 import es.safareyes.parking.entity.Tarifa;
 import es.safareyes.parking.entity.Ticket;
+import es.safareyes.parking.security.UsuarioDetails;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import es.safareyes.parking.repository.IAbonadoRepository;
@@ -130,6 +135,7 @@ public class TicketServiceImpl implements TicketService {
     }
 
     @Override
+    @PreAuthorize("hasAnyRole('ADMIN', 'OPERADOR')")
     @Transactional
     public TicketResponse pagar(TicketPagarRequest request) {
         if (request.codigoCine() != null && !request.codigoCine().isBlank()) {
@@ -188,6 +194,7 @@ public class TicketServiceImpl implements TicketService {
     }
 
     @Override
+    @PreAuthorize("hasAnyRole('ADMIN', 'OPERADOR', 'ABONADO')")
     @Transactional(readOnly = true)
     public Page<TicketResponse> listar(String matricula, String estado, LocalDate desde, LocalDate hasta,
                                        Pageable pageable) {
@@ -195,6 +202,10 @@ public class TicketServiceImpl implements TicketService {
             throw new ReglaNegocioException("La fecha inicial no puede ser posterior a la fecha final");
         }
         Specification<Ticket> filtros = Specification.unrestricted();
+        Integer idAbonado = idAbonadoAutenticado();
+        if (idAbonado != null) {
+            filtros = filtros.and((ticket, query, cb) -> cb.equal(ticket.get("abonado").get("idAbonado"), idAbonado));
+        }
         if (matricula != null && !matricula.isBlank()) {
             String matriculaNormalizada = normalizarMatricula(matricula);
             filtros = filtros.and((ticket, query, cb) -> cb.equal(ticket.get("matricula"), matriculaNormalizada));
@@ -215,11 +226,17 @@ public class TicketServiceImpl implements TicketService {
     }
 
     @Override
+    @PreAuthorize("hasAnyRole('ADMIN', 'OPERADOR', 'ABONADO')")
     @Transactional(readOnly = true)
     public TicketDetalleResponse consultarDetalle(Integer idTicket) {
+        Integer idAbonado = idAbonadoAutenticado();
         Ticket ticket = ticketRepository.buscarPorIdConDescuentos(idTicket);
         if (ticket == null) {
             throw ticketNoEncontrado(idTicket);
+        }
+        if (idAbonado != null && (ticket.getAbonado() == null
+                || !idAbonado.equals(ticket.getAbonado().getIdAbonado()))) {
+            throw new AccessDeniedException("El ticket pertenece a otro usuario");
         }
 
         List<DescuentoResponse> descuentos = new ArrayList<>();
@@ -232,6 +249,20 @@ public class TicketServiceImpl implements TicketService {
         }
         aplicados.stream().map(ticketMapper::toResponse).forEach(descuentos::add);
         return new TicketDetalleResponse(ticketMapper.toResponse(ticket), descuentos);
+    }
+
+    private Integer idAbonadoAutenticado() {
+        var autenticacion = SecurityContextHolder.getContext().getAuthentication();
+        if (autenticacion == null || !(autenticacion.getPrincipal() instanceof UsuarioDetails usuario)) {
+            throw new AccessDeniedException("Usuario no reconocido");
+        }
+        if (usuario.getRol() != Rol.ABONADO) {
+            return null;
+        }
+        if (usuario.getIdAbonado() == null) {
+            throw new AccessDeniedException("La cuenta no está vinculada a un abonado");
+        }
+        return usuario.getIdAbonado();
     }
 
     private RecursoNoEncontradoException ticketNoEncontrado(Integer idTicket) {

@@ -5,6 +5,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.InsufficientAuthenticationException;
 import org.springframework.validation.FieldError;
 import org.springframework.validation.method.ParameterErrors;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -19,6 +22,21 @@ import java.util.stream.Stream;
 
 @RestControllerAdvice
 public class ManejadorExcepciones extends ResponseEntityExceptionHandler {
+
+    @ExceptionHandler(BadCredentialsException.class)
+    public ProblemDetail gestionarCredencialesIncorrectas() {
+        return ProblemDetail.forStatusAndDetail(HttpStatus.UNAUTHORIZED, "Credenciales incorrectas");
+    }
+
+    @ExceptionHandler(InsufficientAuthenticationException.class)
+    public ProblemDetail gestionarNoAutenticado() {
+        return ProblemDetail.forStatusAndDetail(HttpStatus.UNAUTHORIZED, "Necesitas iniciar sesión para acceder");
+    }
+
+    @ExceptionHandler(AccessDeniedException.class)
+    public ProblemDetail gestionarAccesoDenegado() {
+        return ProblemDetail.forStatusAndDetail(HttpStatus.FORBIDDEN, "Tu cuenta no tiene acceso a este recurso");
+    }
 
     @ExceptionHandler(RecursoNoEncontradoException.class)
     public ProblemDetail gestionarRecursoNoEncontrado(RecursoNoEncontradoException excepcion) {

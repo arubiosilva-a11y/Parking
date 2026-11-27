@@ -4,6 +4,7 @@ import es.safareyes.parking.dto.request.AbonadoRequest;
 import es.safareyes.parking.dto.response.AbonadoResponse;
 import es.safareyes.parking.service.AbonadoService;
 import es.safareyes.parking.mapper.AbonadoMapper;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import es.safareyes.parking.repository.IAbonadoRepository;
@@ -20,6 +21,7 @@ public class AbonadoServiceImpl implements AbonadoService {
     }
 
     @Override
+    @PreAuthorize("hasRole('ADMIN')")
     @Transactional
     public AbonadoResponse crear(AbonadoRequest request) {
         return abonadoMapper.toResponse(abonadoRepository.save(abonadoMapper.toEntity(request)));
