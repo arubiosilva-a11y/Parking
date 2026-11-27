@@ -1,5 +1,6 @@
 package es.safareyes.parking.entity;
 
+import es.safareyes.parking.enums.Rol;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -21,19 +22,23 @@ public class Usuario {
     @Column(name = "id_usuario")
     private Integer idUsuario;
 
-    @Column(name = "nombre")
+    @Column(name = "nombre", nullable = false)
     private String nombre;
 
-    @Column(name = "email")
+    @Column(name = "email", nullable = false)
     private String email;
 
-    @Column(name = "contraseña")
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    @Column(name = "contraseña", nullable = false)
     private String contraseña;
 
-    @Column(name = "rol")
-    private String rol;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "rol", nullable = false)
+    private Rol rol;
 
-    @ManyToOne (fetch = FetchType.LAZY)
-    @JoinColumn(name = "id_abonado")
+    @ToString.Exclude
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_abonado", unique = true)
     private Abonado abonado;
 }

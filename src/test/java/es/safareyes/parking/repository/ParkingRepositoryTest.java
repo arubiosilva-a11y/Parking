@@ -1,6 +1,7 @@
 package es.safareyes.parking.repository;
 
 import es.safareyes.parking.entity.*;
+import es.safareyes.parking.enums.Rol;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
@@ -137,7 +138,7 @@ class ParkingRepositoryTest {
     @Test
     void usuarioRepository_shouldPersistUsuarioWithAbonadoRelation() {
         Abonado abonado = abonadoRepository.save(new Abonado(null, "Marta", "marta@test.com", "5555BBB", LocalDateTime.now().plusDays(5), LocalDateTime.now().minusDays(5)));
-        Usuario usuario = new Usuario(null, "Marta", "marta@test.com", "1234", "ADMIN", abonado);
+        Usuario usuario = new Usuario(null, "Marta", "marta@test.com", "hash-de-ejemplo", Rol.ABONADO, abonado);
 
         Usuario guardado = usuarioRepository.save(usuario);
 
